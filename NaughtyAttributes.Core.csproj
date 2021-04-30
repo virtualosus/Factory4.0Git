@@ -371,6 +371,12 @@
     <Reference Include="TDx.TDxInput">
       <HintPath>Assets\game4automation\private\RuntimeUI\SpaceNavigator\Plugins\TDx.TDxInput.dll</HintPath>
     </Reference>
+    <Reference Include="Vuforia.UnityExtensions.Editor">
+      <HintPath>Library\PackageCache\com.ptc.vuforia.engine@541e0ca045\Vuforia\Plugins\Managed\Editor\Vuforia.UnityExtensions.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Vuforia.UnityExtensions">
+      <HintPath>Library\PackageCache\com.ptc.vuforia.engine@541e0ca045\Vuforia\Plugins\Managed\Runtime\Vuforia.UnityExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="netstandard">
       <HintPath>C:\Program Files\Unity\Editors\2020.3.5f1\Editor\Data\NetStandard\ref\2.0.0\netstandard.dll</HintPath>
     </Reference>

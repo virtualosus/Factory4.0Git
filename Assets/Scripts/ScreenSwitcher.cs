@@ -5,7 +5,9 @@ using UnityEngine.UI;
 
 public class ScreenSwitcher : MonoBehaviour
 {
-    public GameObject switchToAR, switchTo3D, ARCanvasDisplay, factory;
+    public MeshRendererSwitch MeshSwitch;
+
+    public GameObject switchToAR, switchTo3D, ARCanvasDisplay, ARCam, ThreeDCam;
 
     // Start is called before the first frame update
     void Start()
@@ -15,17 +17,21 @@ public class ScreenSwitcher : MonoBehaviour
 
     public void ARMode()
     {
+        ThreeDCam.SetActive(false);
+        ARCam.SetActive(true);
         switchToAR.SetActive(false);
         switchTo3D.SetActive(true);
         ARCanvasDisplay.SetActive(true);
-        factory.SetActive(false);
+        MeshSwitch.TurnOffMeshes();
     }
 
     public void ThreeDMode()
     {
+        ARCam.SetActive(false);
+        ThreeDCam.SetActive(true);
         switchToAR.SetActive(true);
         switchTo3D.SetActive(false);
         ARCanvasDisplay.SetActive(false);
-        factory.SetActive(true);
+        MeshSwitch.TurnOnMeshes();
     }
 }
