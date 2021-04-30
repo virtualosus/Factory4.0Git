@@ -1,0 +1,141 @@
+﻿﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEditor;
+using NaughtyAttributes;
+
+
+namespace game4automation
+{
+    [SelectionBase]
+    public class Fixer : Game4AutomationBehavior
+    {
+        [ReadOnly] public MU CurrentMU;
+        public bool FixMU;
+        public bool AligiAndFixOnMinDistance;
+        [ShowIf("FixMU")]public bool ReleaseOnCollissionNonMU = true;
+        public bool AlignMU;
+        public bool ShowStatus;
+        [ShowIf("ShowStatus")] public float StatusOpacity = 0.2f;
+
+        private bool nextmunotnull;
+        private MU lastmu;
+        private float mudistance;
+        private float lasttmudistance;
+        private List<MU> MUs;
+        private MeshRenderer meshrenderer;
+
+
+        // Trigger Enter and Exit from Sensor
+        public void OnTriggerEnter(Collider other)
+        {
+            var mu = other.gameObject.GetComponent<MU>();
+
+            if (mu != null)
+            {
+                if (mu == lastmu)
+                    return;
+                if (mu != CurrentMU && CurrentMU != null)
+                {
+                    Error("Only one MU can be fixed at once by the Fixer");
+                }
+            }
+
+            if (mu != null && CurrentMU != mu)
+            {
+                CurrentMU = mu;
+                nextmunotnull = true;
+                lasttmudistance = 9999;
+            }
+
+            if (ReleaseOnCollissionNonMU)
+                if (mu == null && CurrentMU != null)
+                    Release();
+
+     
+        }
+
+        private void Release()
+        {
+            lastmu = CurrentMU;
+            if (FixMU)
+            {
+                if (CurrentMU.ParentBeforeGrip != null)
+                    CurrentMU.transform.SetParent(CurrentMU.ParentBeforeGrip.transform);
+                else
+                    CurrentMU.transform.SetParent(null);
+                var rb = CurrentMU.GetComponent<Rigidbody>();
+                rb.isKinematic = false;
+                rb.WakeUp();
+            }
+            CurrentMU = null;
+            meshrenderer.material.color = new Color(1,0,0,StatusOpacity);
+        }
+
+        private void FixAndAlign()
+        {
+            if (AlignMU)
+            {
+                CurrentMU.transform.position = transform.position;
+                CurrentMU.transform.rotation = transform.rotation;
+            }
+
+            if (FixMU)
+            {
+                if (!ReferenceEquals(CurrentMU.transform.parent, null))
+                    CurrentMU.ParentBeforeGrip = CurrentMU.transform.parent.gameObject;
+
+                CurrentMU.transform.SetParent(gameObject.transform);
+                CurrentMU.GetComponent<Rigidbody>().isKinematic = true;
+                CurrentMU.GrippedBy = this.gameObject;
+            }
+            else
+            {
+                Release();
+            }
+        }
+
+        private void AtPosition()
+        {
+            nextmunotnull = false;
+            meshrenderer.material.color = new Color(0,1,0,StatusOpacity);
+            FixAndAlign();
+        }
+
+
+        private void Start()
+        {
+            meshrenderer = GetComponent<MeshRenderer>();
+            if (!ShowStatus)
+                meshrenderer.enabled = false;
+            else
+                meshrenderer.material.color = new Color(1, 0, 0, StatusOpacity);
+        }
+
+        private float GetDistance()
+        {
+            return Vector3.Distance(CurrentMU.gameObject.transform.position, this.transform.position);
+        }
+
+
+        void FixedUpdate()
+        {
+            // Check if transportable is in station center
+            if (!nextmunotnull)
+                return;
+            if (AligiAndFixOnMinDistance)
+            {
+                mudistance = GetDistance();
+                if (mudistance > lasttmudistance)
+                {
+                    AtPosition();
+                }
+
+                lasttmudistance = mudistance;
+            }
+            else
+            {
+                AtPosition();
+            }
+        }
+    }
+}
